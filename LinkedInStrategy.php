@@ -136,7 +136,7 @@ class LinkedInStrategy extends OpauthStrategy{
 					$this->mapProfile($profile, 'headline', 'info.headline');
 					$this->mapProfile($profile, 'summary', 'info.description');
 					$this->mapProfile($profile, 'location.name', 'info.location');
-					$this->mapProfile($profile, 'picture-urls', 'info.image');
+					$this->mapProfile($profile, 'picture-url', 'info.image');
 					$this->mapProfile($profile, 'public-profile-url', 'info.urls.linkedin');
 					$this->mapProfile($profile, 'site-standard-profile-request.url', 'info.urls.linkedin_authenticated');
 					
