@@ -43,7 +43,7 @@ class LinkedInStrategy extends OpauthStrategy{
 		'access_token_url' => 'https://api.linkedin.com/uas/oauth/accessToken',
 		
 		'get_profile_url' => 'http://api.linkedin.com/v1/people/~',
-		'profile_fields' => array('id', 'first-name', 'last-name', 'formatted-name', 'headline', 'picture-url', 'summary', 'location', 'public-profile-url', 'site-standard-profile-request', 'email-address', 'educations', 'volunteer', 'certifications', 'skills', 'three-current-positions', 'three-past-positions'),
+		'profile_fields' => array('id', 'first-name', 'last-name', 'formatted-name', 'headline', 'picture-urls::(original)', 'summary', 'location', 'public-profile-url', 'site-standard-profile-request', 'email-address', 'educations', 'volunteer', 'certifications', 'skills', 'three-current-positions', 'three-past-positions'),
 
 		// From tmhOAuth
 		'user_token'					=> '',
@@ -100,7 +100,6 @@ class LinkedInStrategy extends OpauthStrategy{
 	 * Receives oauth_verifier, requests for access_token and redirect to callback
 	 */
 	public function oauth_callback(){
-		session_start();
 		$session = $_SESSION['_opauth_linkedin'];
 		unset($_SESSION['_opauth_linkedin']);
 
@@ -116,6 +115,8 @@ class LinkedInStrategy extends OpauthStrategy{
 			
 			if ($results !== false && !empty($results['oauth_token']) && !empty($results['oauth_token_secret'])){
 				$profile = $this->_getProfile($results['oauth_token'], $results['oauth_token_secret']);
+
+				if(isset($profile['picture-urls'])) $profile['picture-url'] = $profile['picture-urls']['picture-url'];
 		
 				if (!empty($profile['id'])){
 					$this->auth = array(
@@ -135,7 +136,7 @@ class LinkedInStrategy extends OpauthStrategy{
 					$this->mapProfile($profile, 'headline', 'info.headline');
 					$this->mapProfile($profile, 'summary', 'info.description');
 					$this->mapProfile($profile, 'location.name', 'info.location');
-					$this->mapProfile($profile, 'picture-url', 'info.image');
+					$this->mapProfile($profile, 'picture-urls', 'info.image');
 					$this->mapProfile($profile, 'public-profile-url', 'info.urls.linkedin');
 					$this->mapProfile($profile, 'site-standard-profile-request.url', 'info.urls.linkedin_authenticated');
 					
