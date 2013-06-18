@@ -100,6 +100,7 @@ class LinkedInStrategy extends OpauthStrategy{
 	 * Receives oauth_verifier, requests for access_token and redirect to callback
 	 */
 	public function oauth_callback(){
+		session_start();
 		$session = $_SESSION['_opauth_linkedin'];
 		unset($_SESSION['_opauth_linkedin']);
 
@@ -128,7 +129,12 @@ class LinkedInStrategy extends OpauthStrategy{
 						),
 						'raw' => $profile
 					);
-					
+
+					if(isset($this->auth['raw']['educations']) && $this->auth['raw']['educations']['@attributes']['total'] == 1) $this->auth['raw']['educations']['education'] = array($this->auth['raw']['educations']['education']);
+					if(isset($this->auth['raw']['three-current-positions']) && $this->auth['raw']['three-current-positions']['@attributes']['total'] == 1) $this->auth['raw']['three-current-positions']['position'] = array($this->auth['raw']['three-current-positions']['position']);
+					if(isset($this->auth['raw']['three-past-positions']) && $this->auth['raw']['three-past-positions']['@attributes']['total'] == 1) $this->auth['raw']['three-past-positions']['position'] = array($this->auth['raw']['three-past-positions']['position']);
+					if(isset($this->auth['raw']['volunteer']) && $this->auth['raw']['volunteer']['volunteer-experiences']['@attributes']['total'] == 1) $this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience'] = array($this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience']);
+
 					$this->mapProfile($profile, 'formatted-name', 'info.name');
 					$this->mapProfile($profile, 'first-name', 'info.first_name');
 					$this->mapProfile($profile, 'last-name', 'info.last_name');
