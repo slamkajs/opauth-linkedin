@@ -100,7 +100,7 @@ class LinkedInStrategy extends OpauthStrategy{
 	 * Receives oauth_verifier, requests for access_token and redirect to callback
 	 */
 	public function oauth_callback(){
-		session_start();
+		if(session_id() == '') session_start();
 		$session = $_SESSION['_opauth_linkedin'];
 		unset($_SESSION['_opauth_linkedin']);
 
