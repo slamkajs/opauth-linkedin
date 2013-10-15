@@ -135,6 +135,59 @@ class LinkedInStrategy extends OpauthStrategy{
 					if(isset($this->auth['raw']['three-past-positions']) && $this->auth['raw']['three-past-positions']['@attributes']['total'] == 1) $this->auth['raw']['three-past-positions']['position'] = array($this->auth['raw']['three-past-positions']['position']);
 					if(isset($this->auth['raw']['volunteer']) && $this->auth['raw']['volunteer']['volunteer-experiences']['@attributes']['total'] == 1) $this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience'] = array($this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience']);
 
+					$profile['education'] = array();
+					$profile['volunteer'] = array();
+					$profile['work'] = array();
+
+					if(isset($this->auth['raw']['educations']) && !empty($this->auth['raw']['educations'])) {
+						foreach ($this->auth['raw']['educations']['education'] as $edu => $cnt) {
+							$edu = $this->auth['raw']['educations']['education'][$edu];
+							array_push($profile['education'], array(
+								'institution' => (isset($edu['school-name']) && !empty($edu['school-name']) ? $edu['school-name'] : 'Unknown Institution'),
+								'field_of_study' => (isset($edu['field-of-study']) && !empty($edu['field-of-study']) ? $edu['field-of-study'] : null),
+								'start_date' => (isset($edu['start-date']) && !empty($edu['start-date']) ? date('Y-m-d H:i:s', strtotime((isset($edu['start-date']['month']) ? $edu['start-date']['month'] : '01') . '/01/' . $edu['start-date']['year'])) : null),
+								'end_date' => (isset($edu['end-date']) && !empty($edu['end-date']) ? date('Y-m-d H:i:s', strtotime((isset($edu['end-date']['month']) ? $edu['end-date']['month'] : '01') . '/01/' . $edu['end-date']['year'])) : null),
+								'currentlyAttendingFlag' => (!isset($edu['end-date']) || isset($edu['end-date']) && date('Y') <= date('Y', $edu['end-date']['year']) ? 1 : 0)));
+						}
+					}
+
+					if(isset($this->auth['raw']['three-current-positions']) && !empty($this->auth['raw']['three-current-positions'])) {
+						foreach ($this->auth['raw']['three-current-positions']['position'] as $job => $cnt) {
+							$job = $this->auth['raw']['three-current-positions']['position'][$job];
+							array_push($profile['work'], array(
+								'employer' => (isset($job['company']) && !empty($job['company']) ? $job['company']['name'] : 'Unknown Employer'),
+								'position' => (isset($job['title']) && !empty($job['title']) ? $job['title'] : null),
+								'start_date' => (isset($job['start-date']) && !empty($job['start-date']) ? date('Y-m-d H:i:s', strtotime((isset($job['start-date']['month']) ? $job['start-date']['month'] : '01') . '/01/' . $job['start-date']['year'])) : null),
+								'end_date' => (isset($job['end-date']) && !empty($job['end-date']) ? date('Y-m-d H:i:s', strtotime((isset($job['end-date']['month']) ? $job['end-date']['month'] : '01') . '/01/' . $job['end-date']['year'])) : null),
+								'currentlyWorkingFlag' => (isset($job['is-current']) && !empty($job['is-current']) ? ($job['is-current'] == 'true' ? 1 : 0) : 0)));
+						}
+					}
+
+					if(isset($this->auth['raw']['three-past-positions']) && !empty($this->auth['raw']['three-past-positions'])) {
+						foreach ($this->auth['raw']['three-past-positions']['position'] as $job => $cnt) {
+							$job = $this->auth['raw']['three-past-positions']['position'][$job];
+							array_push($profile['work'], array(
+								'employer' => (isset($job['company']) && !empty($job['company']) ? $job['company']['name'] : 'Unknown Employer'),
+								'position' => (isset($job['title']) && !empty($job['title']) ? $job['title'] : null),
+								'start_date' => (isset($job['start-date']) && !empty($job['start-date']) ? date('Y-m-d H:i:s', strtotime((isset($job['start-date']['month']) ? $job['start-date']['month'] : '01') . '/01/' . $job['start-date']['year'])) : null),
+								'end_date' => (isset($job['end-date']) && !empty($job['end-date']) ? date('Y-m-d H:i:s', strtotime((isset($job['end-date']['month']) ? $job['end-date']['month'] : '01') . '/01/' . $job['end-date']['year'])) : null),
+								'currentlyWorkingFlag' => 0));
+						}
+					}
+
+					if(isset($this->auth['raw']['volunteer']['volunteer-experiences']) && !empty($this->auth['raw']['volunteer']['volunteer-experiences'])) {
+						foreach ($this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience'] as $vol => $cnt) {
+							$vol = $this->auth['raw']['volunteer']['volunteer-experiences']['volunteer-experience'][$vol];
+							array_push($profile['volunteer'], array(
+								'volunteer_location' => (isset($vol['organization']) && !empty($vol['organization']) ? $vol['organization']['name'] : 'Unknown Organization'),
+								'job_description' => (isset($vol['role']) && !empty($vol['role']) ? $vol['role'] : null)));
+						}
+					}
+
+
+					$profile['username'] = (!empty($profile['email-address']) ? explode('@',$profile['email-address']): '');
+                	$profile['username'] = (is_array($profile['username']) ? $profile['username'][0] : '');
+                	
 					$this->mapProfile($profile, 'formatted-name', 'info.name');
 					$this->mapProfile($profile, 'first-name', 'info.first_name');
 					$this->mapProfile($profile, 'last-name', 'info.last_name');
@@ -145,6 +198,10 @@ class LinkedInStrategy extends OpauthStrategy{
 					$this->mapProfile($profile, 'picture-url', 'info.image');
 					$this->mapProfile($profile, 'public-profile-url', 'info.urls.linkedin');
 					$this->mapProfile($profile, 'site-standard-profile-request.url', 'info.urls.linkedin_authenticated');
+					$this->mapProfile($profile, 'username', 'info.username');
+					$this->mapProfile($profile, 'education', 'info.education');
+					$this->mapProfile($profile, 'volunteer', 'info.volunteer');
+					$this->mapProfile($profile, 'work', 'info.work');
 					
 					$this->callback();
 				}
